@@ -21,10 +21,42 @@
 
 @implementation ListViewController
 
+#pragma mark - View Life cycle
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    [self initializeNavigationBarItems];
+    self.titlesArray = [NSMutableArray new];
+    self.descriptionArray = [NSMutableArray new];
+    // Do any additional setup after loading the view.
+}
+
+#pragma mark - Button Actions
+
 - (IBAction)onAddButtonTapped:(UIBarButtonItem *)sender
 {
     [self presentDreamEntry];
 }
+
+- (IBAction)onEditButtonTapped:(UIBarButtonItem *)sender
+{
+    self.possibleTitles = [NSSet setWithObjects:@"Edit",@"Done", nil];
+
+    if (self.editing) {
+        self.editing = false;
+        [self.tableView setEditing:false animated:true];
+        sender.style = UIBarButtonItemStylePlain;
+        sender.title = @"Edit";
+    } else {
+        self.editing = true;
+        [self.tableView setEditing:true animated:true];
+        sender.style = UIBarButtonItemStyleDone;
+        sender.title = @"Done";
+
+    }
+}
+
+#pragma mark - UITableView Delegate methods
 
 -(BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -50,24 +82,28 @@
 
 }
 
-- (IBAction)onEditButtonTapped:(UIBarButtonItem *)sender
+#pragma mark - helper methods
+
+-(void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    self.possibleTitles = [NSSet setWithObjects:@"Edit",@"Done", nil];
-
-    if (self.editing) {
-        self.editing = false;
-        [self.tableView setEditing:false animated:true];
-        sender.style = UIBarButtonItemStylePlain;
-        sender.title = @"Edit";
-    } else {
-        self.editing = true;
-        [self.tableView setEditing:true animated:true];
-        sender.style = UIBarButtonItemStyleDone;
-        sender.title = @"Done";
-
-    }
+    [self.titlesArray removeObjectAtIndex:indexPath.row];
+    [self.descriptionArray removeObjectAtIndex:indexPath.row];
+    [self.tableView reloadData];
 }
 
+
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return self.titlesArray.count;
+}
+
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell"];
+    cell.textLabel.text = [self.titlesArray objectAtIndex:indexPath.row];
+    return cell;
+}
 
 -(void)initializeNavigationBarItems
 {
@@ -86,14 +122,6 @@
 
 }
 
-
-
--(void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    [self.titlesArray removeObjectAtIndex:indexPath.row];
-    [self.descriptionArray removeObjectAtIndex:indexPath.row];
-    [self.tableView reloadData];
-}
 
 -(void)presentDreamEntry
 {
@@ -124,27 +152,7 @@
 
 }
 
-- (void)viewDidLoad {
-    [super viewDidLoad];
-    [self initializeNavigationBarItems];
-    self.titlesArray = [NSMutableArray new];
-    self.descriptionArray = [NSMutableArray new];
-    // Do any additional setup after loading the view.
-}
-
-
--(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
-{
-    return self.titlesArray.count;
-}
-
--(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell"];
-    cell.textLabel.text = [self.titlesArray objectAtIndex:indexPath.row];
-    return cell;
-}
+#pragma mark - Segue
 
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
